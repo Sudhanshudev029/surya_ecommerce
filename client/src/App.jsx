@@ -25,6 +25,7 @@ import Addresses from './pages/account/Addresses.jsx';
 
 import AdminOverview from './pages/admin/AdminOverview.jsx';
 import AdminProducts from './pages/admin/AdminProducts.jsx';
+import AdminCategories from './pages/admin/AdminCategories.jsx';
 import AdminOrders from './pages/admin/AdminOrders.jsx';
 import AdminInventory from './pages/admin/AdminInventory.jsx';
 import AdminUsers from './pages/admin/AdminUsers.jsx';
@@ -68,6 +69,7 @@ export default function App() {
         <Route path="admin" element={<AdminLayout />}>
           <Route index element={<AdminOverview />} />
           <Route path="products" element={<AdminProducts />} />
+          <Route path="categories" element={<AdminCategories />} />
           <Route path="orders" element={<AdminOrders />} />
           <Route path="inventory" element={<AdminInventory />} />
           <Route path="users" element={<AdminUsers />} />
