@@ -10,7 +10,8 @@
     "migrate": "node src/db/migrate.js",
     "seed": "node src/db/seed.js",
     "seed:admin": "node src/db/seedAdmin.js",
-    "deploy:setup": "node src/db/migrate.js && node src/db/seedAdmin.js"
+    "seed:defaults": "node src/db/seedDefaults.js",
+    "deploy:setup": "node src/db/migrate.js && node src/db/seedDefaults.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
