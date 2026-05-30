@@ -1,0 +1,36 @@
+# Optional Render Blueprint for the backend API.
+# In Render: New → Blueprint → connect this repo → it reads this file.
+# You still set the secret env vars (DATABASE_URL, JWT_SECRET, CLIENT_URL,
+# CLOUDINARY_*) in the dashboard — they are marked sync:false below.
+services:
+  - type: web
+    name: surya-store-api
+    runtime: node
+    plan: free
+    rootDir: server
+    buildCommand: npm install && npm run deploy:setup
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: BCRYPT_ROUNDS
+        value: "12"
+      - key: CLIENT_URL
+        sync: false
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
