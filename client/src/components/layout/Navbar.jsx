@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import { ShoppingCart, User, LogOut, Search, Menu, LayoutDashboard } from 'lucide-react';
+import { ShoppingCart, User, LogOut, Search, LayoutDashboard } from 'lucide-react';
 import { logout, selectIsAdmin } from '../../features/auth/authSlice.js';
 import { resetCart } from '../../features/cart/cartSlice.js';
 
@@ -27,8 +27,12 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-30 border-b border-gray-200 bg-white">
       <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3">
-        <Link to="/" className="flex items-center gap-2 text-lg font-bold text-brand-700">
-          🛒 <span>Surya Store</span>
+        <Link to="/" className="flex shrink-0 items-center gap-2" aria-label="Surya Store home">
+          <img src="/logo.svg" alt="" className="h-9 w-9" />
+          <span className="text-lg font-extrabold tracking-tight">
+            <span className="text-amber-500">Surya</span>{' '}
+            <span className="text-gray-800">Store</span>
+          </span>
         </Link>
 
         <form onSubmit={submitSearch} className="relative hidden flex-1 md:block">
