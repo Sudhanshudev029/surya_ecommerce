@@ -61,3 +61,12 @@ export const adminApi = {
   lowStock: () => api.get('/inventory/low-stock'),
   setStock: (productId, body) => api.patch(`/inventory/${productId}`, body),
 };
+
+// Image upload (multipart → Cloudinary). Returns { url, publicId }.
+export const uploadApi = {
+  image: (file) => {
+    const fd = new FormData();
+    fd.append('image', file);
+    return api.post('/upload', fd); // axios sets the multipart boundary automatically
+  },
+};

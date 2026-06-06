@@ -8,6 +8,7 @@ import Spinner from '../../components/ui/Spinner.jsx';
 import Badge from '../../components/ui/Badge.jsx';
 import Modal from '../../components/ui/Modal.jsx';
 import ConfirmDialog from '../../components/ui/ConfirmDialog.jsx';
+import ImageUploader from '../../components/ImageUploader.jsx';
 
 const blank = { name: '', categoryId: '', price: '', mrp: '', unit: '', imageUrl: '', quantity: 0, isFeatured: false, isActive: true };
 
@@ -170,7 +171,9 @@ function ProductModal({ open, product, categories, onClose, onSaved }) {
           </label>
           <p className="mt-1 pl-6 text-xs text-gray-500">Uncheck to hide this product from customers without deleting it.</p>
         </div>
-        <div className="col-span-2"><label className="label">Image URL</label><input value={form.imageUrl} onChange={set('imageUrl')} className="input" placeholder="https://... (or upload via Cloudinary)" /></div>
+        <div className="col-span-2">
+          <ImageUploader value={form.imageUrl} onChange={(url) => setForm((f) => ({ ...f, imageUrl: url }))} />
+        </div>
         <div className="col-span-2 flex gap-2">
           <button disabled={saving} className="btn-primary">{saving ? 'Saving...' : 'Save'}</button>
           <button type="button" onClick={onClose} className="btn-outline">Cancel</button>
