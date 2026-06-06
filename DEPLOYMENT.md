@@ -104,13 +104,21 @@ git push -u origin main
    | Framework Preset | Vite *(auto-detected)* |
    | Build Command | `npm run build` *(default)* |
    | Output Directory | `dist` *(default)* |
-4. **Environment Variables** — add one:
+4. **Edit `client/vercel.json`** — set the proxy destination to *your* Render URL:
+   ```json
+   { "source": "/api/:path*", "destination": "https://YOUR-API.onrender.com/api/:path*" }
+   ```
+   This makes Vercel forward `/api/*` to your backend, so the browser talks to the
+   API **same-origin** — **no CORS in production**.
+5. **Environment Variables** — add one:
    | Key | Value |
    |-----|-------|
-   | `VITE_API_URL` | `https://surya-store-api.onrender.com/api` *(your Render URL + `/api`)* |
-5. **Deploy.** When done, copy your frontend URL, e.g. `https://surya-store.vercel.app`.
+   | `VITE_API_URL` | `/api` *(relative — goes through the Vercel proxy above)* |
+6. **Deploy.** When done, copy your frontend URL, e.g. `https://surya-store.vercel.app`.
 
-> The included `client/vercel.json` makes client-side routes (e.g. `/admin`) work on refresh.
+> `client/vercel.json` also makes client-side routes (e.g. `/admin`) work on refresh.
+> Because the API is proxied same-origin, you can largely ignore CORS — but the
+> backend's `CLIENT_URL` (Step 4) is still good practice for any direct API access.
 
 ---
 
