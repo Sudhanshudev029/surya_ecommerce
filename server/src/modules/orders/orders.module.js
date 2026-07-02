@@ -6,6 +6,7 @@ import { ok, created } from '../../utils/response.js';
 import { ApiError } from '../../utils/ApiError.js';
 import { validate } from '../../middleware/validate.js';
 import { requireAuth } from '../../middleware/auth.js';
+import { notifyNewOrder } from '../../services/notify.js';
 
 const router = Router();
 router.use(requireAuth);
@@ -106,6 +107,9 @@ router.post('/', validate(placeOrderSchema), asyncHandler(async (req, res) => {
   });
 
   created(res, order, 'Order placed successfully');
+
+  // Notify the store owner on Telegram — fire-and-forget, never blocks/fails the order.
+  notifyNewOrder(order);
 }));
 
 // List my orders
