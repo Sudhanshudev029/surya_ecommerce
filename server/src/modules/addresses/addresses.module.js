@@ -12,14 +12,14 @@ router.use(requireAuth);
 
 const addressSchema = z.object({
   body: z.object({
-    label: z.string().max(40).optional(),
+    label: z.string().min(1).max(40),
     recipient: z.string().min(2).max(120),
     phone: z.string().min(7).max(20),
     line1: z.string().min(3).max(200),
     line2: z.string().max(200).optional(),
     city: z.string().min(2).max(80),
-    state: z.string().max(80).optional(),
-    pincode: z.string().min(4).max(12),
+    state: z.string().min(1).max(80),
+    pincode: z.string().regex(/^[1-9][0-9]{5}$/, 'Enter a valid 6-digit pincode'),
     isDefault: z.boolean().optional(),
   }),
 });
