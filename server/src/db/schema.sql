@@ -140,6 +140,28 @@ CREATE TABLE IF NOT EXISTS email_otps (
 );
 CREATE INDEX IF NOT EXISTS idx_email_otps_lookup ON email_otps(email, purpose, created_at DESC);
 
+-- ── DELIVERY: address coordinates + store settings ────
+ALTER TABLE addresses ADD COLUMN IF NOT EXISTS lat DOUBLE PRECISION;
+ALTER TABLE addresses ADD COLUMN IF NOT EXISTS lng DOUBLE PRECISION;
+
+CREATE TABLE IF NOT EXISTS delivery_settings (
+  id             INTEGER PRIMARY KEY DEFAULT 1 CHECK (id = 1),
+  rate_per_km    NUMERIC(10,2) NOT NULL DEFAULT 0,   -- ₹ per km
+  free_within_km NUMERIC(10,2) NOT NULL DEFAULT 0,   -- free if distance <= this (0 = never free)
+  store_address  TEXT,
+  store_lat      DOUBLE PRECISION,
+  store_lng      DOUBLE PRECISION,
+  updated_at     TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- Seed the single settings row with the store's location (approx coords —
+-- refine from the admin "Manage Delivery" page).
+INSERT INTO delivery_settings (id, rate_per_km, free_within_km, store_address, store_lat, store_lng)
+VALUES (1, 0, 0,
+  'Surya General Store, 631/111, Ashok Vihar, Ismailganj, Indira Nagar, Lucknow, Uttar Pradesh 226028',
+  26.8840, 81.0130)
+ON CONFLICT (id) DO NOTHING;
+
 -- ── INDEXES ────────────────────────────────────────────
 CREATE INDEX IF NOT EXISTS idx_products_category  ON products(category_id);
 CREATE INDEX IF NOT EXISTS idx_products_active     ON products(is_active);

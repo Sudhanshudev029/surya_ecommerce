@@ -30,6 +30,7 @@ import AdminCategories from './pages/admin/AdminCategories.jsx';
 import AdminOrders from './pages/admin/AdminOrders.jsx';
 import AdminInventory from './pages/admin/AdminInventory.jsx';
 import AdminUsers from './pages/admin/AdminUsers.jsx';
+import AdminDelivery from './pages/admin/AdminDelivery.jsx';
 
 export default function App() {
   const dispatch = useDispatch();
@@ -74,6 +75,7 @@ export default function App() {
           <Route path="orders" element={<AdminOrders />} />
           <Route path="inventory" element={<AdminInventory />} />
           <Route path="users" element={<AdminUsers />} />
+          <Route path="delivery" element={<AdminDelivery />} />
         </Route>
       </Route>
 

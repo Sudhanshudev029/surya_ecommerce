@@ -2,7 +2,7 @@ import { NavLink, Outlet, Link } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import {
-  LayoutDashboard, Package, ShoppingBag, Users, Boxes, Store, LogOut, FolderTree,
+  LayoutDashboard, Package, ShoppingBag, Users, Boxes, Store, LogOut, FolderTree, Truck,
 } from 'lucide-react';
 import { logout } from '../features/auth/authSlice.js';
 
@@ -13,6 +13,7 @@ const links = [
   { to: '/admin/orders', label: 'Orders', icon: ShoppingBag },
   { to: '/admin/inventory', label: 'Inventory', icon: Boxes },
   { to: '/admin/users', label: 'Users', icon: Users },
+  { to: '/admin/delivery', label: 'Manage Delivery', icon: Truck },
 ];
 
 export default function AdminLayout() {

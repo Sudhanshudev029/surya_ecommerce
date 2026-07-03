@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
 import { Pencil } from 'lucide-react';
-import { addressApi, orderApi } from '../api/endpoints.js';
+import { addressApi, orderApi, deliveryApi } from '../api/endpoints.js';
 import { loadCart } from '../features/cart/cartSlice.js';
 import { showApiError } from '../api/axios.js';
 import { formatCurrency } from '../utils/format.js';
@@ -19,8 +19,20 @@ export default function Checkout() {
   const [placing, setPlacing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [notes, setNotes] = useState('');
+  const [delivery, setDelivery] = useState({ fee: 0, distanceKm: null });
+  const [quoting, setQuoting] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  // Quote the delivery fee whenever the selected address changes.
+  useEffect(() => {
+    if (!selected) { setDelivery({ fee: 0, distanceKm: null }); return; }
+    setQuoting(true);
+    deliveryApi.quote(selected)
+      .then((r) => setDelivery({ fee: r.data.data.deliveryFee, distanceKm: r.data.data.distanceKm }))
+      .catch(() => setDelivery({ fee: 0, distanceKm: null }))
+      .finally(() => setQuoting(false));
+  }, [selected]);
 
   const loadAddresses = () =>
     addressApi.list().then((r) => {
@@ -115,8 +127,13 @@ export default function Checkout() {
                 <span>{formatCurrency(it.lineTotal)}</span>
               </div>
             ))}
-            <div className="flex justify-between border-t pt-2"><span className="text-gray-500">Delivery</span><span className="text-green-600">Free</span></div>
-            <div className="flex justify-between text-base font-semibold"><span>Total</span><span>{formatCurrency(subtotal)}</span></div>
+            <div className="flex justify-between border-t pt-2">
+              <span className="text-gray-500">Delivery{delivery.distanceKm ? ` (${delivery.distanceKm} km)` : ''}</span>
+              <span className={delivery.fee > 0 ? '' : 'text-green-600'}>
+                {quoting ? '…' : delivery.fee > 0 ? formatCurrency(delivery.fee) : 'Free'}
+              </span>
+            </div>
+            <div className="flex justify-between text-base font-semibold"><span>Total</span><span>{formatCurrency(subtotal + delivery.fee)}</span></div>
           </div>
           <button onClick={placeOrder} disabled={placing || adding} className="btn-primary mt-4 w-full">
             {placing ? 'Placing...' : 'Place Order (COD)'}

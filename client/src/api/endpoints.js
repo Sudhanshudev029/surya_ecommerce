@@ -52,6 +52,13 @@ export const geoApi = {
   reverse: (lat, lng) => api.get('/geo/reverse', { params: { lat, lng } }),
 };
 
+// Delivery charges
+export const deliveryApi = {
+  getSettings: () => api.get('/delivery/settings'),
+  saveSettings: (body) => api.put('/delivery/settings', body),
+  quote: (addressId) => api.post('/delivery/quote', { addressId }),
+};
+
 // Orders
 export const orderApi = {
   place: (body) => api.post('/orders', body),

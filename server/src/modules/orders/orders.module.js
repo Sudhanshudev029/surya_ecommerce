@@ -8,11 +8,10 @@ import { validate } from '../../middleware/validate.js';
 import { requireAuth } from '../../middleware/auth.js';
 import { notifyNewOrder } from '../../services/notify.js';
 import { sendOrderConfirmationEmail } from '../../services/orderEmails.js';
+import { quoteDelivery } from '../../services/deliveryService.js';
 
 const router = Router();
 router.use(requireAuth);
-
-const DELIVERY_FEE = 0; // flat free delivery for now
 
 const placeOrderSchema = z.object({
   body: z.object({
@@ -74,9 +73,11 @@ router.post('/', validate(placeOrderSchema), asyncHandler(async (req, res) => {
         throw ApiError.conflict(`Insufficient stock for ${it.name} (only ${it.stock ?? 0} left)`);
     }
 
-    const subtotal = items.rows.reduce((s, it) => s + Number(it.price) * it.quantity, 0);
-    const total = subtotal + DELIVERY_FEE;
     const a = addr.rows[0];
+    const subtotal = items.rows.reduce((s, it) => s + Number(it.price) * it.quantity, 0);
+    // Delivery fee is computed server-side from the address distance (never trust the client).
+    const { deliveryFee } = await quoteDelivery(a.lat, a.lng);
+    const total = subtotal + deliveryFee;
 
     const orderRes = await client.query(
       `INSERT INTO orders
@@ -84,7 +85,7 @@ router.post('/', validate(placeOrderSchema), asyncHandler(async (req, res) => {
           ship_city, ship_state, ship_pincode, subtotal, delivery_fee, total, notes)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) RETURNING *`,
       [userId, paymentMethod, a.recipient, a.phone, a.line1, a.line2,
-       a.city, a.state, a.pincode, subtotal, DELIVERY_FEE, total, notes || null],
+       a.city, a.state, a.pincode, subtotal, deliveryFee, total, notes || null],
     );
     const newOrder = orderRes.rows[0];
 

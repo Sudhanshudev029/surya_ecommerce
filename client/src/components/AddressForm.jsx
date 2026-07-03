@@ -42,6 +42,8 @@ export default function AddressForm({ initial, onSaved, onCancel }) {
     state: initial?.state ?? '',
     pincode: initial?.pincode ?? '',
     isDefault: initial?.isDefault ?? false,
+    lat: initial?.lat ?? null,
+    lng: initial?.lng ?? null,
   }));
   const [errors, setErrors] = useState({});
   const [saving, setSaving] = useState(false);
@@ -61,6 +63,8 @@ export default function AddressForm({ initial, onSaved, onCancel }) {
       if (addr.city) next.city = addr.city;
       if (addr.pincode && PINCODE_RE.test(addr.pincode)) next.pincode = addr.pincode;
       if (addr.state && INDIAN_STATES.includes(addr.state)) next.state = addr.state;
+      // Coordinates power the delivery-distance calculation at checkout.
+      if (addr.lat != null && addr.lng != null) { next.lat = addr.lat; next.lng = addr.lng; }
       return next;
     });
     setErrors((er) => {
@@ -93,6 +97,8 @@ export default function AddressForm({ initial, onSaved, onCancel }) {
         state: form.state,
         pincode: form.pincode.trim(),
         isDefault: form.isDefault,
+        lat: form.lat,
+        lng: form.lng,
       };
       const { data } = initial?.id
         ? await addressApi.update(initial.id, payload)
@@ -133,7 +139,11 @@ export default function AddressForm({ initial, onSaved, onCancel }) {
         <label className="label">Address</label>
         <AddressAutocomplete
           value={form.line1}
-          onChange={(v) => setField('line1', v)}
+          onChange={(v) => {
+            // Typing manually invalidates any coordinates from a previous pick.
+            setForm((f) => ({ ...f, line1: v, lat: null, lng: null }));
+            if (errors.line1) setErrors((er) => ({ ...er, line1: validators.line1(v) }));
+          }}
           onPick={applyPicked}
           className={errClass('line1')}
           placeholder="House / flat, street, area"

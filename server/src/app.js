@@ -16,6 +16,7 @@ import inventoryRoutes from './modules/inventory/inventory.module.js';
 import adminRoutes from './modules/admin/admin.module.js';
 import uploadRoutes from './modules/upload/upload.module.js';
 import geoRoutes from './modules/geo/geo.module.js';
+import deliveryRoutes from './modules/delivery/delivery.module.js';
 
 const app = express();
 
@@ -56,6 +57,7 @@ app.use('/api/inventory', inventoryRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/geo', geoRoutes);
+app.use('/api/delivery', deliveryRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
