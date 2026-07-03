@@ -12,8 +12,13 @@ const publicUser = (u) => ({
 });
 
 export async function register({ fullName, email, phone, password }) {
-  const existing = await query('SELECT 1 FROM users WHERE email = $1', [email]);
-  if (existing.rowCount) throw ApiError.conflict('Email already registered');
+  // Generic message on purpose — don't reveal whether the email OR the phone
+  // is the one already taken (prevents account enumeration).
+  const existing = await query(
+    'SELECT 1 FROM users WHERE email = $1 OR phone = $2 LIMIT 1',
+    [email, phone],
+  );
+  if (existing.rowCount) throw ApiError.conflict('An account already exists. Please log in.');
 
   const passwordHash = await hashPassword(password);
 
@@ -31,13 +36,22 @@ export async function register({ fullName, email, phone, password }) {
   return { user: publicUser(user), token: signToken({ sub: user.id, role: user.role }) };
 }
 
-export async function login({ email, password }) {
-  const { rows } = await query('SELECT * FROM users WHERE email = $1', [email]);
+export async function login({ identifier, password }) {
+  // Customers log in with phone; the admin/owner may also use email.
+  const id = String(identifier).trim();
+  let rows;
+  if (id.includes('@')) {
+    ({ rows } = await query('SELECT * FROM users WHERE email = $1', [id]));
+  } else {
+    const digits = id.replace(/\D/g, '');
+    const phone = digits.length > 10 ? digits.slice(-10) : digits;
+    ({ rows } = await query('SELECT * FROM users WHERE phone = $1', [phone]));
+  }
   const user = rows[0];
-  if (!user) throw ApiError.unauthorized('Invalid email or password');
+  if (!user) throw ApiError.unauthorized('Invalid phone number or password');
 
   const valid = await comparePassword(password, user.password_hash);
-  if (!valid) throw ApiError.unauthorized('Invalid email or password');
+  if (!valid) throw ApiError.unauthorized('Invalid phone number or password');
   if (user.is_blocked) throw ApiError.forbidden('Your account has been blocked');
 
   return { user: publicUser(user), token: signToken({ sub: user.id, role: user.role }) };

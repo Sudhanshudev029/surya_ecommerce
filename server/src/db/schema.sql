@@ -137,3 +137,17 @@ CREATE INDEX IF NOT EXISTS idx_orders_status       ON orders(status);
 CREATE INDEX IF NOT EXISTS idx_orders_created      ON orders(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_cart_items_cart     ON cart_items(cart_id);
 CREATE INDEX IF NOT EXISTS idx_addresses_user      ON addresses(user_id);
+
+-- Phone is a login identifier → normalize existing values to 10 digits,
+-- then enforce uniqueness (partial: NULL phones, e.g. old admin, are allowed).
+UPDATE users
+   SET phone = RIGHT(regexp_replace(phone, '\D', '', 'g'), 10)
+ WHERE phone IS NOT NULL
+   AND length(regexp_replace(phone, '\D', '', 'g')) >= 10
+   AND phone !~ '^[6-9][0-9]{9}$';
+
+DO $$ BEGIN
+  CREATE UNIQUE INDEX IF NOT EXISTS uniq_users_phone ON users(phone) WHERE phone IS NOT NULL;
+EXCEPTION WHEN others THEN
+  RAISE NOTICE 'Skipped unique phone index (duplicate phones exist): %', SQLERRM;
+END $$;

@@ -3,16 +3,25 @@ import { authApi } from '../../api/endpoints.js';
 
 const tokenFromStorage = localStorage.getItem('token');
 
-export const login = createAsyncThunk('auth/login', async (creds) => {
-  const { data } = await authApi.login(creds);
-  localStorage.setItem('token', data.data.token);
-  return data.data.user;
+export const login = createAsyncThunk('auth/login', async (creds, { rejectWithValue }) => {
+  try {
+    const { data } = await authApi.login(creds);
+    localStorage.setItem('token', data.data.token);
+    return data.data.user;
+  } catch (err) {
+    // Preserve the friendly message (thunk serialization otherwise drops it).
+    return rejectWithValue({ normalizedMessage: err.normalizedMessage || 'Login failed' });
+  }
 });
 
-export const register = createAsyncThunk('auth/register', async (body) => {
-  const { data } = await authApi.register(body);
-  localStorage.setItem('token', data.data.token);
-  return data.data.user;
+export const register = createAsyncThunk('auth/register', async (body, { rejectWithValue }) => {
+  try {
+    const { data } = await authApi.register(body);
+    localStorage.setItem('token', data.data.token);
+    return data.data.user;
+  } catch (err) {
+    return rejectWithValue({ normalizedMessage: err.normalizedMessage || 'Registration failed' });
+  }
 });
 
 export const loadMe = createAsyncThunk('auth/loadMe', async (_, { rejectWithValue }) => {
