@@ -31,8 +31,10 @@ async function sendViaBrevo({ to, subject, html, text }) {
   });
   if (!res.ok) {
     const body = await res.text().catch(() => '');
-    console.error(`Brevo send failed ${res.status}: ${body.slice(0, 300)}`);
-    throw new ApiError(502, 'Could not send the email. Please try again shortly.');
+    console.error(`Brevo send failed ${res.status}: ${body.slice(0, 400)}`);
+    throw new ApiError(502, 'Could not send the email. Please try again shortly.', {
+      reason: `Brevo ${res.status}: ${body.slice(0, 200)}`,
+    });
   }
 }
 
