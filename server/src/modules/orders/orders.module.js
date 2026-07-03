@@ -7,6 +7,7 @@ import { ApiError } from '../../utils/ApiError.js';
 import { validate } from '../../middleware/validate.js';
 import { requireAuth } from '../../middleware/auth.js';
 import { notifyNewOrder } from '../../services/notify.js';
+import { sendOrderConfirmationEmail } from '../../services/orderEmails.js';
 
 const router = Router();
 router.use(requireAuth);
@@ -108,8 +109,9 @@ router.post('/', validate(placeOrderSchema), asyncHandler(async (req, res) => {
 
   created(res, order, 'Order placed successfully');
 
-  // Notify the store owner on Telegram — fire-and-forget, never blocks/fails the order.
+  // Notify the store owner on Telegram + email the customer — fire-and-forget.
   notifyNewOrder(order);
+  sendOrderConfirmationEmail(order, { email: req.user.email, fullName: req.user.full_name });
 }));
 
 // List my orders

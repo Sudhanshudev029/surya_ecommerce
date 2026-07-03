@@ -8,6 +8,7 @@ import { validate } from '../../middleware/validate.js';
 import { requireAuth } from '../../middleware/auth.js';
 import { requireAdmin } from '../../middleware/requireRole.js';
 import { mapOrder } from '../orders/orders.module.js';
+import { sendOrderStatusEmail } from '../../services/orderEmails.js';
 
 const router = Router();
 router.use(requireAuth, requireAdmin);
@@ -109,11 +110,11 @@ const statusSchema = z.object({
 
 router.patch('/orders/:id/status', validate(statusSchema), asyncHandler(async (req, res) => {
   const next = req.body.status;
-  const result = await withTransaction(async (client) => {
+  const { order: result, changed } = await withTransaction(async (client) => {
     const { rows } = await client.query('SELECT * FROM orders WHERE id = $1 FOR UPDATE', [req.params.id]);
     const order = rows[0];
     if (!order) throw ApiError.notFound('Order not found');
-    if (order.status === next) return order;
+    if (order.status === next) return { order, changed: false };
     if (!NEXT[order.status].includes(next))
       throw ApiError.badRequest(`Cannot change status from ${order.status} to ${next}`);
 
@@ -132,9 +133,20 @@ router.patch('/orders/:id/status', validate(statusSchema), asyncHandler(async (r
          payment_status = CASE WHEN $2 = 'delivered' THEN 'paid' ELSE payment_status END,
          updated_at = now() WHERE id = $1 RETURNING *`,
       [order.id, next]);
-    return upd.rows[0];
+    return { order: upd.rows[0], changed: true };
   });
   ok(res, mapOrder(result), 'Order status updated');
+
+  // Email the customer about the status change — fire-and-forget, after the response.
+  if (changed) {
+    query('SELECT email, full_name FROM users WHERE id = $1', [result.user_id])
+      .then(({ rows }) => {
+        if (rows[0]?.email) {
+          sendOrderStatusEmail(mapOrder(result), { email: rows[0].email, fullName: rows[0].full_name });
+        }
+      })
+      .catch(() => {});
+  }
 }));
 
 // ── User management ───────────────────────────────────
