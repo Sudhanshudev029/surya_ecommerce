@@ -19,12 +19,10 @@ const schema = z.object({
   // Order notifications — Telegram
   TELEGRAM_BOT_TOKEN: z.string().optional().default(''),
   TELEGRAM_CHAT_ID: z.string().optional().default(''),
-  // Email (SMTP) for OTP verification & password reset
-  SMTP_HOST: z.string().optional().default(''),
-  SMTP_PORT: z.coerce.number().default(587),
-  SMTP_USER: z.string().optional().default(''),
-  SMTP_PASS: z.string().optional().default(''),
-  SMTP_FROM: z.string().optional().default(''), // e.g. "Surya Store <no-reply@yourdomain.com>"
+  // Email — Brevo HTTP API (works locally and on cloud hosts that block SMTP)
+  BREVO_API_KEY: z.string().optional().default(''),
+  MAIL_FROM: z.string().optional().default(''),   // "Surya Store <no-reply@x.com>" — a verified Brevo sender
+  SMTP_FROM: z.string().optional().default(''),   // legacy alias for MAIL_FROM
 });
 
 const parsed = schema.safeParse(process.env);
