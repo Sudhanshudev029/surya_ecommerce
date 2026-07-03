@@ -10,14 +10,14 @@ import { showApiError } from '../../api/axios.js';
 export default function Account() {
   const user = useSelector((s) => s.auth.user);
   const dispatch = useDispatch();
-  const [form, setForm] = useState({ fullName: user.fullName, phone: user.phone || '' });
+  const [form, setForm] = useState({ fullName: user.fullName });
   const [saving, setSaving] = useState(false);
 
   const save = async (e) => {
     e.preventDefault();
     setSaving(true);
     try {
-      const { data } = await authApi.updateProfile(form);
+      const { data } = await authApi.updateProfile({ fullName: form.fullName });
       dispatch(setUser(data.data.user));
       toast.success('Profile updated');
     } catch (e2) { showApiError(e2); } finally { setSaving(false); }
@@ -37,8 +37,8 @@ export default function Account() {
           <h2 className="mb-4 font-semibold">Profile Details</h2>
           <form onSubmit={save} className="space-y-4">
             <div><label className="label">Full name</label><input value={form.fullName} onChange={(e) => setForm({ ...form, fullName: e.target.value })} className="input" /></div>
-            <div><label className="label">Email</label><input value={user.email} disabled className="input bg-gray-50" /></div>
-            <div><label className="label">Phone</label><input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="input" /></div>
+            <div><label className="label">Email</label><input value={user.email} disabled className="input cursor-not-allowed bg-gray-50 text-gray-600" /></div>
+            <div><label className="label">Phone</label><input value={user.phone || ''} disabled className="input cursor-not-allowed bg-gray-50 text-gray-600" /></div>
             <button disabled={saving} className="btn-primary">{saving ? 'Saving...' : 'Save Changes'}</button>
           </form>
         </div>

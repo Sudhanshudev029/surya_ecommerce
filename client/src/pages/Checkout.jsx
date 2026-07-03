@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
+import { Pencil } from 'lucide-react';
 import { addressApi, orderApi } from '../api/endpoints.js';
 import { loadCart } from '../features/cart/cartSlice.js';
 import { showApiError } from '../api/axios.js';
@@ -14,6 +15,7 @@ export default function Checkout() {
   const [addresses, setAddresses] = useState([]);
   const [selected, setSelected] = useState(null);
   const [adding, setAdding] = useState(false);
+  const [editing, setEditing] = useState(null); // address being edited, or null
   const [placing, setPlacing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [notes, setNotes] = useState('');
@@ -57,24 +59,33 @@ export default function Checkout() {
           <section className="card p-5">
             <div className="mb-3 flex items-center justify-between">
               <h2 className="font-semibold">Delivery Address</h2>
-              {!adding && <button onClick={() => setAdding(true)} className="text-sm font-medium text-brand-700 hover:underline">+ Add new</button>}
+              {!adding && !editing && <button onClick={() => setAdding(true)} className="text-sm font-medium text-brand-700 hover:underline">+ Add new</button>}
             </div>
 
-            {adding ? (
+            {adding || editing ? (
               <AddressForm
-                onCancel={addresses.length ? () => setAdding(false) : undefined}
-                onSaved={async (addr) => { await loadAddresses(); setSelected(addr.id); setAdding(false); }}
+                initial={editing || undefined}
+                onCancel={(addresses.length || editing) ? () => { setAdding(false); setEditing(null); } : undefined}
+                onSaved={async (addr) => { await loadAddresses(); setSelected(addr.id); setAdding(false); setEditing(null); }}
               />
             ) : (
               <div className="space-y-2">
                 {addresses.map((a) => (
-                  <label key={a.id} className={`flex cursor-pointer gap-3 rounded-lg border p-3 ${selected === a.id ? 'border-brand-500 bg-brand-50' : 'border-gray-200'}`}>
-                    <input type="radio" name="addr" checked={selected === a.id} onChange={() => setSelected(a.id)} className="mt-1" />
-                    <div className="text-sm">
-                      <p className="font-medium">{a.recipient} · {a.phone}</p>
-                      <p className="text-gray-600">{a.line1}{a.line2 ? `, ${a.line2}` : ''}, {a.city} {a.state ? `, ${a.state}` : ''} - {a.pincode}</p>
-                    </div>
-                  </label>
+                  <div key={a.id} className={`flex items-start gap-3 rounded-lg border p-3 ${selected === a.id ? 'border-brand-500 bg-brand-50' : 'border-gray-200'}`}>
+                    <label className="flex flex-1 cursor-pointer gap-3">
+                      <input type="radio" name="addr" checked={selected === a.id} onChange={() => setSelected(a.id)} className="mt-1" />
+                      <div className="text-sm">
+                        <p className="font-medium">
+                          {a.recipient} · {a.phone}
+                          {a.label && <span className="ml-2 rounded-full bg-gray-100 px-2 py-0.5 text-xs font-normal text-gray-600">{a.label}</span>}
+                        </p>
+                        <p className="text-gray-600">{a.line1}{a.line2 ? `, ${a.line2}` : ''}, {a.city}{a.state ? `, ${a.state}` : ''} - {a.pincode}</p>
+                      </div>
+                    </label>
+                    <button type="button" onClick={() => setEditing(a)} className="text-gray-400 hover:text-brand-700" aria-label="Edit address">
+                      <Pencil className="h-4 w-4" />
+                    </button>
+                  </div>
                 ))}
               </div>
             )}

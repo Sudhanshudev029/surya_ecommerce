@@ -38,7 +38,7 @@ export const loginSchema = z.object({
 export const updateProfileSchema = z.object({
   body: z.object({
     fullName: z.string().min(2).max(120).optional(),
-    phone: z.string().min(7).max(20).optional(),
+    // phone is intentionally NOT updatable — it's a login credential.
   }),
 });
 

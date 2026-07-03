@@ -57,14 +57,11 @@ export async function login({ identifier, password }) {
   return { user: publicUser(user), token: signToken({ sub: user.id, role: user.role }) };
 }
 
-export async function updateProfile(userId, { fullName, phone }) {
+export async function updateProfile(userId, { fullName }) {
   const { rows } = await query(
-    `UPDATE users SET
-       full_name = COALESCE($2, full_name),
-       phone     = COALESCE($3, phone),
-       updated_at = now()
+    `UPDATE users SET full_name = COALESCE($2, full_name), updated_at = now()
      WHERE id = $1 RETURNING *`,
-    [userId, fullName ?? null, phone ?? null],
+    [userId, fullName ?? null],
   );
   return publicUser(rows[0]);
 }
