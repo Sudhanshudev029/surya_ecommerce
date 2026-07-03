@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import { ShoppingCart, User, LogOut, Search, LayoutDashboard } from 'lucide-react';
+import { ShoppingCart, User, LogOut, LayoutDashboard } from 'lucide-react';
 import { logout, selectIsAdmin } from '../../features/auth/authSlice.js';
 import { resetCart } from '../../features/cart/cartSlice.js';
+import SearchAutocomplete from '../SearchAutocomplete.jsx';
 
 export default function Navbar() {
   const { user } = useSelector((s) => s.auth);
@@ -11,13 +12,8 @@ export default function Navbar() {
   const count = useSelector((s) => s.cart.count);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [q, setQ] = useState('');
   const [open, setOpen] = useState(false);
 
-  const submitSearch = (e) => {
-    e.preventDefault();
-    navigate(`/products?search=${encodeURIComponent(q)}`);
-  };
   const handleLogout = () => {
     dispatch(logout());
     dispatch(resetCart());
@@ -35,15 +31,9 @@ export default function Navbar() {
           </span>
         </Link>
 
-        <form onSubmit={submitSearch} className="relative hidden flex-1 md:block">
-          <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
-          <input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="Search for oil, vegetables, snacks..."
-            className="input pl-9"
-          />
-        </form>
+        <div className="hidden flex-1 md:block">
+          <SearchAutocomplete />
+        </div>
 
         <nav className="ml-auto flex items-center gap-1">
           <Link to="/products" className="btn-ghost hidden sm:inline-flex">Shop</Link>
@@ -89,10 +79,9 @@ export default function Navbar() {
       </div>
 
       {/* mobile search */}
-      <form onSubmit={submitSearch} className="relative px-4 pb-3 md:hidden">
-        <Search className="absolute left-7 top-2.5 h-4 w-4 text-gray-400" />
-        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search products..." className="input pl-9" />
-      </form>
+      <div className="px-4 pb-3 md:hidden">
+        <SearchAutocomplete placeholder="Search products..." />
+      </div>
     </header>
   );
 }
