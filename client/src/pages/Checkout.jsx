@@ -3,14 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
 import { addressApi, orderApi } from '../api/endpoints.js';
-import { fetchCart } from '../features/cart/cartSlice.js';
+import { loadCart } from '../features/cart/cartSlice.js';
 import { showApiError } from '../api/axios.js';
 import { formatCurrency } from '../utils/format.js';
 import Spinner from '../components/ui/Spinner.jsx';
 import AddressForm from '../components/AddressForm.jsx';
 
 export default function Checkout() {
-  const { items, subtotal } = useSelector((s) => s.cart);
+  const { items, subtotal, status: cartStatus } = useSelector((s) => s.cart);
   const [addresses, setAddresses] = useState([]);
   const [selected, setSelected] = useState(null);
   const [adding, setAdding] = useState(false);
@@ -29,17 +29,23 @@ export default function Checkout() {
 
   useEffect(() => { loadAddresses().finally(() => setLoading(false)); }, []);
 
-  if (loading) return <div className="flex justify-center py-20"><Spinner className="h-8 w-8" /></div>;
-  if (items.length === 0) { navigate('/cart'); return null; }
+  // Redirect to the cart only once the cart is settled (avoids a race where a
+  // just-logged-in guest's merged cart hasn't loaded yet).
+  useEffect(() => {
+    if (cartStatus !== 'loading' && items.length === 0) navigate('/cart', { replace: true });
+  }, [cartStatus, items.length, navigate]);
+
+  if (loading || cartStatus === 'loading') return <div className="flex justify-center py-20"><Spinner className="h-8 w-8" /></div>;
+  if (items.length === 0) return null; // the effect above will redirect
 
   const placeOrder = async () => {
     if (!selected) { toast.error('Please select a delivery address'); return; }
     setPlacing(true);
     try {
       const { data } = await orderApi.place({ addressId: selected, paymentMethod: 'cod', notes });
-      await dispatch(fetchCart());
       toast.success('Order placed!');
       navigate(`/order-success/${data.data.id}`);
+      dispatch(loadCart()); // refresh the now-empty cart in the background
     } catch (e) { showApiError(e); } finally { setPlacing(false); }
   };
 

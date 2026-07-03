@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { login } from '../../features/auth/authSlice.js';
+import { loadCart } from '../../features/cart/cartSlice.js';
 import { showApiError } from '../../api/axios.js';
 
 // Validate as a 10-digit mobile. An email is also accepted so the store
@@ -49,6 +50,7 @@ export default function Login() {
     setLoading(true);
     try {
       const user = await dispatch(login({ identifier: form.identifier.trim(), password: form.password })).unwrap();
+      await dispatch(loadCart()); // merge the guest cart into their account before continuing
       navigate(['admin', 'superadmin'].includes(user.role) ? '/admin' : from, { replace: true });
     } catch (e2) {
       showApiError(e2);

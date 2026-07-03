@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
+import { useParams, Link } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import { Minus, Plus, ShoppingCart, ChevronLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { productApi } from '../api/endpoints.js';
@@ -16,8 +16,6 @@ export default function ProductDetails() {
   const [loading, setLoading] = useState(true);
   const [qty, setQty] = useState(1);
   const dispatch = useDispatch();
-  const navigate = useNavigate();
-  const user = useSelector((s) => s.auth.user);
 
   useEffect(() => {
     setLoading(true);
@@ -34,9 +32,8 @@ export default function ProductDetails() {
     ? Math.round(((product.mrp - product.price) / product.mrp) * 100) : 0;
 
   const handleAdd = async () => {
-    if (!user) { navigate('/login'); return; }
     try {
-      await dispatch(addToCart({ productId: product.id, quantity: qty })).unwrap();
+      await dispatch(addToCart({ product, quantity: qty })).unwrap();
       toast.success('Added to cart');
     } catch (e) { showApiError(e); }
   };

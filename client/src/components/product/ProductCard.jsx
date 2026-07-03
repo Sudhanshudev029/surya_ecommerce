@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import { ShoppingCart, Plus } from 'lucide-react';
+import { useDispatch } from 'react-redux';
+import { Plus } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { addToCart } from '../../features/cart/cartSlice.js';
 import { showApiError } from '../../api/axios.js';
@@ -9,15 +9,13 @@ import Badge from '../ui/Badge.jsx';
 
 export default function ProductCard({ product }) {
   const dispatch = useDispatch();
-  const user = useSelector((s) => s.auth.user);
   const discount = product.mrp && product.mrp > product.price
     ? Math.round(((product.mrp - product.price) / product.mrp) * 100)
     : 0;
 
   const handleAdd = async () => {
-    if (!user) { toast('Please log in to add items'); return; }
     try {
-      await dispatch(addToCart({ productId: product.id, quantity: 1 })).unwrap();
+      await dispatch(addToCart({ product, quantity: 1 })).unwrap();
       toast.success(`${product.name} added to cart`);
     } catch (e) { showApiError(e); }
   };

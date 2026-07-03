@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { loadMe } from './features/auth/authSlice.js';
-import { fetchCart, resetCart } from './features/cart/cartSlice.js';
+import { loadCart } from './features/cart/cartSlice.js';
 
 import StoreLayout from './layouts/StoreLayout.jsx';
 import AdminLayout from './layouts/AdminLayout.jsx';
@@ -39,10 +39,9 @@ export default function App() {
     if (localStorage.getItem('token')) dispatch(loadMe());
   }, [dispatch]);
 
-  // Keep the server cart in sync with auth state.
+  // Load the cart (guest-local or server) and re-run on login/logout.
   useEffect(() => {
-    if (user) dispatch(fetchCart());
-    else dispatch(resetCart());
+    dispatch(loadCart());
   }, [user, dispatch]);
 
   return (

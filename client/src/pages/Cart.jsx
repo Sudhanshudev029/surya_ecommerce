@@ -12,10 +12,6 @@ export default function Cart() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  if (!user) {
-    return <EmptyState icon={ShoppingCart} title="Please log in to view your cart"
-      action={<Link to="/login" className="btn-primary">Login</Link>} />;
-  }
   if (items.length === 0) {
     return <EmptyState icon={ShoppingCart} title="Your cart is empty"
       subtitle="Browse products and add items to your cart."
@@ -54,7 +50,15 @@ export default function Cart() {
             <div className="flex justify-between"><span className="text-gray-500">Delivery</span><span className="text-green-600">Free</span></div>
             <div className="mt-2 flex justify-between border-t pt-2 text-base font-semibold"><span>Total</span><span>{formatCurrency(subtotal)}</span></div>
           </div>
-          <button onClick={() => navigate('/checkout')} className="btn-primary mt-4 w-full">Proceed to Checkout</button>
+          <button
+            onClick={() => (user ? navigate('/checkout') : navigate('/login', { state: { from: { pathname: '/checkout' } } }))}
+            className="btn-primary mt-4 w-full"
+          >
+            {user ? 'Proceed to Checkout' : 'Login to Checkout'}
+          </button>
+          {!user && (
+            <p className="mt-2 text-center text-xs text-gray-500">Your cart will be saved when you log in.</p>
+          )}
         </div>
       </div>
     </div>
