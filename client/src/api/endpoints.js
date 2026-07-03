@@ -45,6 +45,13 @@ export const addressApi = {
   remove: (id) => api.delete(`/addresses/${id}`),
 };
 
+// Geocoding (India address autocomplete via Ola Maps, proxied server-side)
+export const geoApi = {
+  autocomplete: (q, signal) => api.get('/geo/autocomplete', { params: { q }, signal }),
+  details: (placeId) => api.get('/geo/details', { params: { placeId } }),
+  reverse: (lat, lng) => api.get('/geo/reverse', { params: { lat, lng } }),
+};
+
 // Orders
 export const orderApi = {
   place: (body) => api.post('/orders', body),

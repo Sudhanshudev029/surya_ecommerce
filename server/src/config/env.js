@@ -23,6 +23,8 @@ const schema = z.object({
   BREVO_API_KEY: z.string().optional().default(''),
   MAIL_FROM: z.string().optional().default(''),   // "Surya Store <no-reply@x.com>" — a verified Brevo sender
   SMTP_FROM: z.string().optional().default(''),   // legacy alias for MAIL_FROM
+  // Address autocomplete / geocoding — Ola Maps (India-accurate, POI support)
+  OLA_MAPS_API_KEY: z.string().optional().default(''),
 });
 
 const parsed = schema.safeParse(process.env);

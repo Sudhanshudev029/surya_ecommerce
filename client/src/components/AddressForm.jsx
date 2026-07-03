@@ -3,15 +3,20 @@ import { useSelector } from 'react-redux';
 import { addressApi } from '../api/endpoints.js';
 import { showApiError } from '../api/axios.js';
 import SearchableSelect from './ui/SearchableSelect.jsx';
+import AddressAutocomplete from './AddressAutocomplete.jsx';
 
 const LABELS = ['Home', 'Shop', 'Office', 'Other'];
 
 const INDIAN_STATES = [
+  // States
   'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh', 'Goa', 'Gujarat',
-  'Haryana', 'Himachal Pradesh', 'Jammu and Kashmir', 'Jharkhand', 'Karnataka', 'Kerala',
+  'Haryana', 'Himachal Pradesh', 'Jharkhand', 'Karnataka', 'Kerala',
   'Madhya Pradesh', 'Maharashtra', 'Manipur', 'Meghalaya', 'Mizoram', 'Nagaland', 'Odisha',
   'Punjab', 'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Telangana', 'Tripura', 'Uttar Pradesh',
   'Uttarakhand', 'West Bengal',
+  // Union Territories (names match the Ola Maps geocoder output)
+  'Andaman and Nicobar Islands', 'Chandigarh', 'Dadra and Nagar Haveli and Daman and Diu',
+  'Delhi', 'Jammu and Kashmir', 'Ladakh', 'Lakshadweep', 'Puducherry',
 ];
 
 const PINCODE_RE = /^[1-9][0-9]{5}$/;
@@ -46,6 +51,24 @@ export default function AddressForm({ initial, onSaved, onCancel }) {
     if (errors[k]) setErrors((er) => ({ ...er, [k]: validators[k] ? validators[k](value) : '' }));
   };
   const onText = (k) => (e) => setField(k, e.target.value);
+
+  // Fill fields from a chosen suggestion / detected location. State is only
+  // applied when it matches our supported list (keeps the dropdown valid);
+  // city/pincode fill only when they came back empty-or-usable.
+  const applyPicked = (addr) => {
+    setForm((f) => {
+      const next = { ...f, line1: addr.line1 || f.line1 };
+      if (addr.city) next.city = addr.city;
+      if (addr.pincode && PINCODE_RE.test(addr.pincode)) next.pincode = addr.pincode;
+      if (addr.state && INDIAN_STATES.includes(addr.state)) next.state = addr.state;
+      return next;
+    });
+    setErrors((er) => {
+      const cleared = { ...er };
+      for (const k of ['line1', 'city', 'state', 'pincode']) delete cleared[k];
+      return cleared;
+    });
+  };
   const errClass = (k) => `input ${errors[k] ? 'border-red-400 focus:border-red-500 focus:ring-red-100' : ''}`;
   const Err = ({ k }) => (errors[k] ? <p className="mt-1 text-xs text-red-600">{errors[k]}</p> : null);
 
@@ -108,7 +131,13 @@ export default function AddressForm({ initial, onSaved, onCancel }) {
       {/* Address (single line) */}
       <div className="col-span-2">
         <label className="label">Address</label>
-        <input value={form.line1} onChange={onText('line1')} className={errClass('line1')} placeholder="House / flat, street, area" />
+        <AddressAutocomplete
+          value={form.line1}
+          onChange={(v) => setField('line1', v)}
+          onPick={applyPicked}
+          className={errClass('line1')}
+          placeholder="House / flat, street, area"
+        />
         <Err k="line1" />
       </div>
 
