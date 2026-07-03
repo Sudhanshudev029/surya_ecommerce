@@ -16,6 +16,7 @@ import Checkout from './pages/Checkout.jsx';
 import OrderSuccess from './pages/OrderSuccess.jsx';
 import Login from './pages/auth/Login.jsx';
 import Register from './pages/auth/Register.jsx';
+import ForgotPassword from './pages/auth/ForgotPassword.jsx';
 import NotFound from './pages/NotFound.jsx';
 
 import Account from './pages/account/Account.jsx';
@@ -53,6 +54,7 @@ export default function App() {
         <Route path="cart" element={<Cart />} />
         <Route path="login" element={<Login />} />
         <Route path="register" element={<Register />} />
+        <Route path="forgot-password" element={<ForgotPassword />} />
 
         <Route element={<ProtectedRoute />}>
           <Route path="checkout" element={<Checkout />} />

@@ -2,6 +2,7 @@ import { query, withTransaction } from '../../config/db.js';
 import { ApiError } from '../../utils/ApiError.js';
 import { hashPassword, comparePassword } from '../../utils/password.js';
 import { signToken } from '../../utils/jwt.js';
+import { verifyOtp, consumeOtp } from './otp.service.js';
 
 const publicUser = (u) => ({
   id: u.id,
@@ -11,8 +12,11 @@ const publicUser = (u) => ({
   role: u.role,
 });
 
-export async function register({ fullName, email, phone, password }) {
-  // Generic message on purpose — don't reveal whether the email OR the phone
+export async function register({ fullName, email, phone, password, otp }) {
+  // 1. The email must be proven via a valid OTP before anything else.
+  const otpId = await verifyOtp(email, 'register', otp);
+
+  // 2. Generic message on purpose — don't reveal whether the email OR the phone
   // is the one already taken (prevents account enumeration).
   const existing = await query(
     'SELECT 1 FROM users WHERE email = $1 OR phone = $2 LIMIT 1',
@@ -33,7 +37,25 @@ export async function register({ fullName, email, phone, password }) {
     return rows[0];
   });
 
+  await consumeOtp(otpId); // one-time use
   return { user: publicUser(user), token: signToken({ sub: user.id, role: user.role }) };
+}
+
+export async function resetPassword({ email, otp, newPassword }) {
+  // Uniform error for every failure — never reveal whether the email exists,
+  // whether an OTP was sent, or why the code failed (prevents enumeration).
+  const invalid = ApiError.badRequest('Invalid or expired OTP. Please request a new code.');
+  let otpId;
+  try {
+    otpId = await verifyOtp(email, 'reset', otp);
+  } catch {
+    throw invalid;
+  }
+  const { rows } = await query('SELECT id FROM users WHERE email = $1', [email]);
+  if (!rows[0]) throw invalid;
+  const passwordHash = await hashPassword(newPassword);
+  await query('UPDATE users SET password_hash = $2, updated_at = now() WHERE id = $1', [rows[0].id, passwordHash]);
+  await consumeOtp(otpId);
 }
 
 export async function login({ identifier, password }) {

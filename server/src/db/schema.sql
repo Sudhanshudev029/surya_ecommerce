@@ -127,6 +127,19 @@ CREATE TABLE IF NOT EXISTS order_items (
   line_total    NUMERIC(10,2) NOT NULL
 );
 
+-- ── EMAIL OTPs (registration + password reset) ─────────
+CREATE TABLE IF NOT EXISTS email_otps (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  email       CITEXT NOT NULL,
+  purpose     VARCHAR(20) NOT NULL,           -- 'register' | 'reset'
+  code_hash   TEXT NOT NULL,
+  attempts    INTEGER NOT NULL DEFAULT 0,
+  consumed    BOOLEAN NOT NULL DEFAULT FALSE,
+  expires_at  TIMESTAMPTZ NOT NULL,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_email_otps_lookup ON email_otps(email, purpose, created_at DESC);
+
 -- ── INDEXES ────────────────────────────────────────────
 CREATE INDEX IF NOT EXISTS idx_products_category  ON products(category_id);
 CREATE INDEX IF NOT EXISTS idx_products_active     ON products(is_active);

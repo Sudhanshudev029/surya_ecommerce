@@ -8,6 +8,20 @@ const normalizePhone = (v) => {
 };
 const tenDigitMobile = /^[6-9]\d{9}$/; // Indian mobile after normalization
 
+const strongPassword = z.string()
+  .min(8, 'Password must be at least 8 characters')
+  .max(72, 'Password is too long')
+  .regex(/[a-z]/, 'Password must include a lowercase letter')
+  .regex(/[A-Z]/, 'Password must include an uppercase letter')
+  .regex(/[0-9]/, 'Password must include a number')
+  .regex(/[^A-Za-z0-9]/, 'Password must include a special character');
+
+const otpCode = z.string().trim().regex(/^\d{6}$/, 'Enter the 6-digit code');
+
+export const sendOtpSchema = z.object({
+  body: z.object({ email: z.string().trim().email('Enter a valid email address') }),
+});
+
 export const registerSchema = z.object({
   body: z.object({
     fullName: z.string().trim()
@@ -18,13 +32,16 @@ export const registerSchema = z.object({
       normalizePhone,
       z.string().regex(tenDigitMobile, 'Enter a valid 10-digit mobile number'),
     ),
-    password: z.string()
-      .min(8, 'Password must be at least 8 characters')
-      .max(72, 'Password is too long')
-      .regex(/[a-z]/, 'Password must include a lowercase letter')
-      .regex(/[A-Z]/, 'Password must include an uppercase letter')
-      .regex(/[0-9]/, 'Password must include a number')
-      .regex(/[^A-Za-z0-9]/, 'Password must include a special character'),
+    password: strongPassword,
+    otp: otpCode,
+  }),
+});
+
+export const resetPasswordSchema = z.object({
+  body: z.object({
+    email: z.string().trim().email('Enter a valid email address'),
+    otp: otpCode,
+    newPassword: strongPassword,
   }),
 });
 

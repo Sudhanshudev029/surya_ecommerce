@@ -73,7 +73,10 @@ export default function Login() {
             {errors.identifier && <p className="mt-1 text-xs text-red-600">{errors.identifier}</p>}
           </div>
           <div>
-            <label className="label">Password</label>
+            <div className="flex items-center justify-between">
+              <label className="label">Password</label>
+              <Link to="/forgot-password" className="mb-1 text-xs font-medium text-brand-700 hover:underline">Forgot password?</Link>
+            </div>
             <input type="password" value={form.password} onChange={setField('password')} className={cls('password')} />
             {errors.password && <p className="mt-1 text-xs text-red-600">{errors.password}</p>}
           </div>

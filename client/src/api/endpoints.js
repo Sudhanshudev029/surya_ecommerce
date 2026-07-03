@@ -2,7 +2,10 @@ import api from './axios.js';
 
 // Auth
 export const authApi = {
+  sendRegisterOtp: (email) => api.post('/auth/register/send-otp', { email }),
   register: (body) => api.post('/auth/register', body),
+  forgotPasswordOtp: (email) => api.post('/auth/forgot-password/send-otp', { email }),
+  resetPassword: (body) => api.post('/auth/reset-password', body),
   login: (body) => api.post('/auth/login', body),
   me: () => api.get('/auth/me'),
   updateProfile: (body) => api.patch('/auth/profile', body),
