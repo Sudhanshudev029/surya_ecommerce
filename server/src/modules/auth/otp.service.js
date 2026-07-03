@@ -1,12 +1,12 @@
 import crypto from 'node:crypto';
 import { query } from '../../config/db.js';
+import { env } from '../../config/env.js';
 import { ApiError } from '../../utils/ApiError.js';
 import { hashPassword, comparePassword } from '../../utils/password.js';
 import { sendMail } from '../../services/mailer.js';
 
 const OTP_TTL_SECONDS = 60;   // valid for 1 minute
-const MAX_PER_WINDOW = 3;     // max OTP sends...
-const WINDOW_HOURS = 8;       // ...per 8 hours (per email + purpose)
+const WINDOW_HOURS = 8;       // rate-limit window (per email + purpose)
 const MAX_ATTEMPTS = 5;       // wrong-code guesses before an OTP is locked
 
 const genCode = () => String(crypto.randomInt(0, 1_000_000)).padStart(6, '0');
@@ -34,14 +34,18 @@ function otpEmail(code, purpose) {
 
 /** Generate, store (hashed), and email an OTP. Enforces the send rate limit. */
 export async function sendOtp(email, purpose) {
-  const { rows } = await query(
-    `SELECT COUNT(*)::int AS c FROM email_otps
-     WHERE email = $1 AND purpose = $2 AND created_at > now() - ($3 || ' hours')::interval`,
-    [email, purpose, String(WINDOW_HOURS)],
-  );
-  if (rows[0].c >= MAX_PER_WINDOW) {
-    throw new ApiError(429,
-      `Too many OTP requests. You can request up to ${MAX_PER_WINDOW} codes every ${WINDOW_HOURS} hours. Please try again later.`);
+  // Rate limit is disabled when OTP_MAX_PER_WINDOW is 0 (default in dev).
+  const maxPerWindow = env.OTP_MAX_PER_WINDOW;
+  if (maxPerWindow > 0) {
+    const { rows } = await query(
+      `SELECT COUNT(*)::int AS c FROM email_otps
+       WHERE email = $1 AND purpose = $2 AND created_at > now() - ($3 || ' hours')::interval`,
+      [email, purpose, String(WINDOW_HOURS)],
+    );
+    if (rows[0].c >= maxPerWindow) {
+      throw new ApiError(429,
+        `Too many OTP requests. You can request up to ${maxPerWindow} codes every ${WINDOW_HOURS} hours. Please try again later.`);
+    }
   }
 
   const code = genCode();
