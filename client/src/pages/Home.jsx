@@ -47,7 +47,14 @@ export default function Home() {
               <Link to="/products" className="inline-flex items-center gap-2 rounded-lg bg-white px-5 py-2.5 font-semibold text-brand-700 shadow-md transition hover:-translate-y-0.5 hover:bg-brand-50">
                 Shop Now <ArrowRight className="h-4 w-4" />
               </Link>
-              <a href="#categories" className="inline-flex items-center gap-2 rounded-lg border border-white/40 px-5 py-2.5 font-medium text-white transition hover:bg-white/10">
+              <a
+                href="#categories"
+                onClick={(e) => {
+                  e.preventDefault();
+                  document.getElementById('categories')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }}
+                className="inline-flex items-center gap-2 rounded-lg border border-white/40 px-5 py-2.5 font-medium text-white transition hover:bg-white/10"
+              >
                 Browse Categories
               </a>
             </div>
