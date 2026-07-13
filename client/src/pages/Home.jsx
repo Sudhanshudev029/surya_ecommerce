@@ -5,6 +5,35 @@ import { productApi, categoryApi } from '../api/endpoints.js';
 import ProductCard from '../components/product/ProductCard.jsx';
 import Spinner from '../components/ui/Spinner.jsx';
 
+// Client's in-store promotions. Each card blends an image into its gradient
+// (like the hero). `fade` = the overlay colour that hides the image on the left.
+const OFFERS = [
+  {
+    tag: 'Weekly reward',
+    title: '₹30 Maggi or ₹30 cashback',
+    desc: 'Order ₹200+ every day for a week and claim your reward.',
+    gradient: 'from-teal-500 to-emerald-600',
+    fade: 'from-emerald-600 via-emerald-600/60',
+    image: 'https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=500&q=80',
+  },
+  {
+    tag: 'Monthly bonus',
+    title: 'Free atta, rice & Maggi',
+    desc: 'Spend ₹5,000 in a month → 2 kg atta / 1 kg rice + a Maggi free.',
+    gradient: 'from-amber-400 to-orange-500',
+    fade: 'from-orange-500 via-orange-500/60',
+    image: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=500&q=80',
+  },
+  {
+    tag: 'Free delivery',
+    title: 'Delivery free over ₹2,500',
+    desc: 'Any order above ₹2,500 ships free — from any distance.',
+    gradient: 'from-violet-500 to-indigo-600',
+    fade: 'from-indigo-600 via-indigo-600/60',
+    image: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=500&q=80',
+  },
+];
+
 export default function Home() {
   const [featured, setFeatured] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -32,18 +61,18 @@ export default function Home() {
 
         <div className="relative grid items-center md:grid-cols-2">
           {/* Copy */}
-          <div className="px-6 py-10 sm:px-10 sm:py-14">
+          <div className="px-6 py-7 sm:px-9 sm:py-8">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold backdrop-blur">
               <Truck className="h-3.5 w-3.5" /> Fast local delivery
             </span>
-            <h1 className="mt-4 text-3xl font-extrabold leading-tight sm:text-4xl lg:text-5xl">
+            <h1 className="mt-3 text-2xl font-extrabold leading-tight sm:text-3xl lg:text-4xl">
               Daily essentials,<br className="hidden sm:block" /> delivered to your door
             </h1>
-            <p className="mt-3 max-w-md text-brand-50">
+            <p className="mt-2 max-w-md text-sm text-brand-50 sm:text-base">
               Cooking oil, fresh vegetables, snacks, groceries & household items —
               order online and pay on delivery.
             </p>
-            <div className="mt-6 flex flex-wrap gap-3">
+            <div className="mt-5 flex flex-wrap gap-3">
               <Link to="/products" className="inline-flex items-center gap-2 rounded-lg bg-white px-5 py-2.5 font-semibold text-brand-700 shadow-md transition hover:-translate-y-0.5 hover:bg-brand-50">
                 Shop Now <ArrowRight className="h-4 w-4" />
               </Link>
@@ -61,7 +90,7 @@ export default function Home() {
           </div>
 
           {/* Image (desktop) — fades into the gradient on its left edge */}
-          <div className="relative hidden min-h-[300px] self-stretch md:block">
+          <div className="relative hidden min-h-[220px] self-stretch md:block">
             <img
               src="https://images.unsplash.com/photo-1542838132-92c53300491e?w=900&q=80"
               alt="Fresh groceries and vegetables"
@@ -70,6 +99,25 @@ export default function Home() {
             />
             <div className="absolute inset-0 bg-gradient-to-r from-brand-600 via-brand-600/40 to-transparent" />
           </div>
+        </div>
+      </section>
+
+      {/* Offers */}
+      <section>
+        <div className="grid gap-4 md:grid-cols-3">
+          {OFFERS.map(({ tag, title, desc, gradient, fade, image }) => (
+            <div key={tag} className={`relative min-h-[150px] overflow-hidden rounded-2xl bg-gradient-to-br ${gradient} text-white shadow-sm`}>
+              {/* image blended into the gradient */}
+              <img src={image} alt="" loading="lazy" className="absolute inset-y-0 right-0 h-full w-3/5 object-cover" />
+              <div className={`absolute inset-0 bg-gradient-to-r ${fade} to-transparent`} />
+              {/* copy */}
+              <div className="relative p-5">
+                <span className="inline-block rounded-full bg-white/20 px-2.5 py-0.5 text-xs font-semibold backdrop-blur">{tag}</span>
+                <h3 className="mt-3 max-w-[62%] text-lg font-bold leading-snug">{title}</h3>
+                <p className="mt-1 max-w-[60%] text-sm text-white/90">{desc}</p>
+              </div>
+            </div>
+          ))}
         </div>
       </section>
 
