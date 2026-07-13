@@ -75,8 +75,8 @@ router.post('/', validate(placeOrderSchema), asyncHandler(async (req, res) => {
 
     const a = addr.rows[0];
     const subtotal = items.rows.reduce((s, it) => s + Number(it.price) * it.quantity, 0);
-    // Delivery fee is computed server-side from the address distance (never trust the client).
-    const { deliveryFee } = await quoteDelivery(a.lat, a.lng);
+    // Delivery fee is computed server-side from distance + subtotal (never trust the client).
+    const { deliveryFee } = await quoteDelivery(a.lat, a.lng, subtotal);
     const total = subtotal + deliveryFee;
 
     const orderRes = await client.query(

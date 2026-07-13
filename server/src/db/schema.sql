@@ -145,14 +145,19 @@ ALTER TABLE addresses ADD COLUMN IF NOT EXISTS lat DOUBLE PRECISION;
 ALTER TABLE addresses ADD COLUMN IF NOT EXISTS lng DOUBLE PRECISION;
 
 CREATE TABLE IF NOT EXISTS delivery_settings (
-  id             INTEGER PRIMARY KEY DEFAULT 1 CHECK (id = 1),
-  rate_per_km    NUMERIC(10,2) NOT NULL DEFAULT 0,   -- ₹ per km
-  free_within_km NUMERIC(10,2) NOT NULL DEFAULT 0,   -- free if distance <= this (0 = never free)
-  store_address  TEXT,
-  store_lat      DOUBLE PRECISION,
-  store_lng      DOUBLE PRECISION,
-  updated_at     TIMESTAMPTZ NOT NULL DEFAULT now()
+  id                INTEGER PRIMARY KEY DEFAULT 1 CHECK (id = 1),
+  rate_per_km       NUMERIC(10,2) NOT NULL DEFAULT 0,   -- ₹ per km
+  free_within_km    NUMERIC(10,2) NOT NULL DEFAULT 0,   -- free if distance <= this (0 = never free)
+  free_above_amount NUMERIC(10,2) NOT NULL DEFAULT 0,   -- free if order subtotal >= this (0 = off)
+  free_tiers        JSONB NOT NULL DEFAULT '[]',        -- [{ "km": 5, "minAmount": 1000 }, ...]
+  store_address     TEXT,
+  store_lat         DOUBLE PRECISION,
+  store_lng         DOUBLE PRECISION,
+  updated_at        TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+-- Add the newer columns to any pre-existing table.
+ALTER TABLE delivery_settings ADD COLUMN IF NOT EXISTS free_above_amount NUMERIC(10,2) NOT NULL DEFAULT 0;
+ALTER TABLE delivery_settings ADD COLUMN IF NOT EXISTS free_tiers JSONB NOT NULL DEFAULT '[]';
 
 -- Seed the single settings row with the store's location (approx coords —
 -- refine from the admin "Manage Delivery" page).
