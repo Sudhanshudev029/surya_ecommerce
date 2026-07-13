@@ -25,16 +25,44 @@ export default function Home() {
   return (
     <div className="space-y-10">
       {/* Hero */}
-      <section className="overflow-hidden rounded-2xl bg-gradient-to-r from-brand-600 to-brand-500 px-6 py-12 text-white sm:px-12 sm:py-16">
-        <div className="max-w-xl">
-          <h1 className="text-3xl font-bold sm:text-4xl">Daily essentials, delivered to your door</h1>
-          <p className="mt-3 text-brand-50">
-            Cooking oil, fresh vegetables, snacks, groceries & household items —
-            order online and pay on delivery.
-          </p>
-          <Link to="/products" className="mt-6 inline-flex items-center gap-2 rounded-lg bg-white px-5 py-2.5 font-medium text-brand-700 hover:bg-brand-50">
-            Shop Now <ArrowRight className="h-4 w-4" />
-          </Link>
+      <section className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-brand-700 via-brand-600 to-brand-500 text-white shadow-lg">
+        {/* soft decorative glows */}
+        <div className="pointer-events-none absolute -right-20 -top-24 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-24 left-1/4 h-64 w-64 rounded-full bg-emerald-300/20 blur-3xl" />
+
+        <div className="relative grid items-center md:grid-cols-2">
+          {/* Copy */}
+          <div className="px-6 py-10 sm:px-10 sm:py-14">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold backdrop-blur">
+              <Truck className="h-3.5 w-3.5" /> Fast local delivery
+            </span>
+            <h1 className="mt-4 text-3xl font-extrabold leading-tight sm:text-4xl lg:text-5xl">
+              Daily essentials,<br className="hidden sm:block" /> delivered to your door
+            </h1>
+            <p className="mt-3 max-w-md text-brand-50">
+              Cooking oil, fresh vegetables, snacks, groceries & household items —
+              order online and pay on delivery.
+            </p>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <Link to="/products" className="inline-flex items-center gap-2 rounded-lg bg-white px-5 py-2.5 font-semibold text-brand-700 shadow-md transition hover:-translate-y-0.5 hover:bg-brand-50">
+                Shop Now <ArrowRight className="h-4 w-4" />
+              </Link>
+              <a href="#categories" className="inline-flex items-center gap-2 rounded-lg border border-white/40 px-5 py-2.5 font-medium text-white transition hover:bg-white/10">
+                Browse Categories
+              </a>
+            </div>
+          </div>
+
+          {/* Image (desktop) — fades into the gradient on its left edge */}
+          <div className="relative hidden min-h-[300px] self-stretch md:block">
+            <img
+              src="https://images.unsplash.com/photo-1542838132-92c53300491e?w=900&q=80"
+              alt="Fresh groceries and vegetables"
+              className="absolute inset-0 h-full w-full object-cover"
+              loading="eager"
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-brand-600 via-brand-600/40 to-transparent" />
+          </div>
         </div>
       </section>
 
@@ -53,7 +81,7 @@ export default function Home() {
       </section>
 
       {/* Categories */}
-      <section>
+      <section id="categories" className="scroll-mt-20">
         <h2 className="mb-4 text-xl font-semibold">Shop by Category</h2>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5">
           {categories.map((c) => (
